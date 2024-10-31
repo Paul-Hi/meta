@@ -870,7 +870,7 @@ inline factory<Type> reflect(const std::size_t identifier, Property &&... proper
 template<typename Type, typename... Property>
 inline factory<Type> named_reflect(const std::string_view& name, Property &&... property) noexcept {
     std::hash<std::string_view> hash{};
-    return reflect<Type>(hash(name), std::make_pair(hash("name"), std::forward<const std::string_view&>(name)), std::forward<Property>(property)...);
+    return reflect<Type>(hash(name), std::make_pair(hash("name"), std::string(name)), std::forward<Property>(property)...);
 }
 
 /**
@@ -889,10 +889,10 @@ inline factory<Type> named_reflect(const std::string_view& name, Property &&... 
  * @return A meta factory for the given type.
  */
 template <typename Type, typename... Property>
-inline factory<Type> named_reflect(const std::string_view& name, const std::vector<std::string_view>& aliases, Property &&... property) noexcept {
+inline factory<Type> named_reflect(const std::string_view& name, const std::vector<std::string>& aliases, Property &&... property) noexcept {
     std::hash<std::string_view> hash{};
-    return reflect<Type>(hash(name), std::make_pair(hash("name"), std::forward<const std::string_view&>(name)), std::make_pair(hash("alias"),
-                                    std::forward<const std::vector<std::string_view>&>(aliases)), std::forward<Property>(property)...);
+    return reflect<Type>(hash(name), std::make_pair(hash("name"), std::string(name)), std::make_pair(hash("alias"),
+                                    std::forward<const std::vector<std::string>&>(aliases)), std::forward<Property>(property)...);
 }
 
 
@@ -964,7 +964,7 @@ inline type resolve(const std::size_t identifier) noexcept {
             while (prop_node) {
                 if (prop_node->key() == aliasHash)
                 {
-                    auto aliases = prop_node->value().template cast<std::vector<std::string_view>>();
+                    auto aliases = prop_node->value().template cast<std::vector<std::string>>();
 
                     for (auto &alias : aliases)
                     {
@@ -1001,19 +1001,19 @@ resolve(Op op) noexcept {
  * @param type Type to get names for.
  * @return A list of names for the given type.
  */
-inline std::vector<std::string_view> get_all_names(const meta::type& type)
+inline std::vector<std::string> get_all_names(const meta::type& type)
 {
-    std::vector<std::string_view> names;
+    std::vector<std::string> names;
     std::hash<std::string_view> hash{};
     size_t nameHash = hash("name");
     size_t aliasHash = hash("alias");
     if (type.prop(nameHash))
     {
-        names.push_back(type.prop(nameHash).value().cast<std::string_view>());
+        names.push_back(type.prop(nameHash).value().cast<std::string>());
     }
     if (type.prop(aliasHash))
     {
-        auto aliases = type.prop(aliasHash).value().cast<std::vector<std::string_view>>();
+        auto aliases = type.prop(aliasHash).value().cast<std::vector<std::string>>();
         for (auto& alias : aliases)
         {
             names.push_back(alias);
@@ -1044,9 +1044,9 @@ inline std::pair<std::size_t, T> make_property(const std::string_view& name, T v
  * @param name The name to add as a property.
  * @return A property pair to pass to the reflect function.
  */
-inline std::pair<std::size_t, std::string_view> make_name_property(const std::string_view& name)
+inline std::pair<std::size_t, std::string> make_name_property(const std::string& name)
 {
-    return make_property("name", std::forward<const std::string_view&>(name));
+    return make_property("name", std::forward<const std::string&>(name));
 }
 
 }
